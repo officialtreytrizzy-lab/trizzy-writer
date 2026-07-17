@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { saveDecisionToFirebase } from "@/lib/firebase/data";
 import { WRITING_MODES } from "@/lib/modes";
+import { analyzeLyrics } from "@/lib/lyric-analysis";
 import type {
   DecisionRecord,
   DecisionStatus,
@@ -71,6 +72,9 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [decisions, setDecisions] = useState<DecisionRecord[]>([]);
+  const [originalOutput, setOriginalOutput] = useState("");
+  const [userNotes, setUserNotes] = useState("");
+  const [userRatings, setUserRatings] = useState({ hook: 5, verses: 5, rhyme: 5, originality: 5, emotion: 5, replay: 5 });
   const [health, setHealth] = useState<HealthState>({
     status: "checking",
     detail: "Checking model connection...",
@@ -165,6 +169,8 @@ export default function Home() {
       }
 
       setOutput(data.text);
+      setOriginalOutput(data.text);
+      setUserNotes("");
       setModel(data.model);
       setProvider(data.provider);
       setWarnings(data.warnings);
@@ -200,6 +206,10 @@ export default function Home() {
       status,
       createdAt: new Date().toISOString(),
       model: model || "unknown",
+      originalOutput,
+      userRatings,
+      userNotes: userNotes.trim(),
+      lyricAnalysis: analyzeLyrics(output),
     };
     persistDecisions([decision, ...decisions]);
 
@@ -258,6 +268,10 @@ export default function Home() {
             mode: item.mode,
             contentLevel: item.contentLevel,
             createdAt: item.createdAt,
+            originalOutput: item.originalOutput,
+            userRatings: item.userRatings,
+            userNotes: item.userNotes,
+            lyricAnalysis: item.lyricAnalysis,
           },
         }),
       )
@@ -270,6 +284,7 @@ export default function Home() {
   function loadHistory(item: HistoryItem): void {
     setRequest(item.request);
     setOutput(item.output);
+    setOriginalOutput(item.output);
     setModel(item.model);
     setWarnings([]);
     setMessage(`Loaded session from ${new Date(item.createdAt).toLocaleString()}.`);
@@ -278,6 +293,8 @@ export default function Home() {
   function newSession(): void {
     setRequest(initialRequest);
     setOutput("");
+    setOriginalOutput("");
+    setUserNotes("");
     setWarnings([]);
     setMessage("New session opened.");
   }
@@ -468,6 +485,15 @@ export default function Home() {
             placeholder="Your generated song or revision will appear here. Edit it before approving it for future fine-tuning."
             spellCheck
           />
+
+          {output ? (
+            <section className="dna-panel">
+              <div className="dna-heading"><div><p className="label">Lyric DNA</p><h3>Automatic technique analysis</h3></div><strong>{analyzeLyrics(output).scores.overall}/10</strong></div>
+              <div className="score-grid">{Object.entries(analyzeLyrics(output).scores).filter(([key]) => key !== "overall").map(([key, value]) => <article key={key}><span>{key.replace(/([A-Z])/g, " $1")}</span><strong>{value}</strong><div><i style={{ width: `${value * 10}%` }} /></div></article>)}</div>
+              <div className="critic-grid"><div><h4>Strengths</h4>{analyzeLyrics(output).strengths.map((item) => <p key={item}>+ {item}</p>)}</div><div><h4>Improve next</h4>{analyzeLyrics(output).improvements.map((item) => <p key={item}>- {item}</p>)}</div></div>
+              <div className="preference-panel"><h4>Teach Trizzy Writer your taste</h4><div className="rating-grid">{Object.entries(userRatings).map(([key, value]) => <label key={key}><span>{key}</span><input type="range" min="1" max="10" value={value} onChange={(event) => setUserRatings((current) => ({ ...current, [key]: Number(event.target.value) }))} /><strong>{value}</strong></label>)}</div><textarea rows={3} value={userNotes} onChange={(event) => setUserNotes(event.target.value)} placeholder="Why did you approve, reject, or edit this? These notes become preference-learning data." /></div>
+            </section>
+          ) : null}
 
           <footer className="output-footer">
             <span>{message || "Approved outputs become clean training examples."}</span>

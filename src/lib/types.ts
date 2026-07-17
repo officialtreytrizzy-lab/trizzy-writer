@@ -30,6 +30,7 @@ export type GenerateResponse = {
 };
 
 export type DecisionStatus = "approved" | "rejected";
+export type TechniqueRatings = Record<string, number>;
 
 export type DecisionRecord = GenerateRequest & {
   id: string;
@@ -37,4 +38,8 @@ export type DecisionRecord = GenerateRequest & {
   status: DecisionStatus;
   createdAt: string;
   model: string;
+  originalOutput?: string;
+  userRatings?: TechniqueRatings;
+  userNotes?: string;
+  lyricAnalysis?: import("./lyric-analysis").LyricAnalysis;
 };
