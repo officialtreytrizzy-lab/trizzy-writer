@@ -8,6 +8,9 @@ export const MODE_IDS = [
 
 export type ModeId = (typeof MODE_IDS)[number];
 
+export const CONTENT_LEVELS = ["clean", "explicit", "raw-adult"] as const;
+export type ContentLevel = (typeof CONTENT_LEVELS)[number];
+
 export type GenerateRequest = {
   mode: ModeId;
   prompt: string;
@@ -15,6 +18,7 @@ export type GenerateRequest = {
   lockedLyrics: string;
   maxCharacters: number;
   creativity: number;
+  contentLevel: ContentLevel;
 };
 
 export type GenerateResponse = {

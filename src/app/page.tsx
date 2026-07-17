@@ -9,6 +9,7 @@ import type {
   DecisionStatus,
   GenerateRequest,
   GenerateResponse,
+  ContentLevel,
   ModeId,
 } from "@/lib/types";
 
@@ -34,6 +35,7 @@ const initialRequest: GenerateRequest = {
   lockedLyrics: "",
   maxCharacters: 3500,
   creativity: 0.78,
+  contentLevel: "explicit",
 };
 
 const HISTORY_KEY = "trizzy-writer-history-v1";
@@ -236,7 +238,7 @@ export default function Home() {
           messages: [
             {
               role: "system",
-              content: `Trizzy Writer approved example. Mode: ${item.mode}. Character limit: ${item.maxCharacters}.`,
+              content: `Trizzy Writer approved example. Mode: ${item.mode}. Content level: ${item.contentLevel}. Character limit: ${item.maxCharacters}.`,
             },
             {
               role: "user",
@@ -254,6 +256,7 @@ export default function Home() {
             id: item.id,
             model: item.model,
             mode: item.mode,
+            contentLevel: item.contentLevel,
             createdAt: item.createdAt,
           },
         }),
@@ -322,6 +325,27 @@ export default function Home() {
                 <span>{mode.description}</span>
               </button>
             ))}
+          </div>
+
+          <div className="field">
+            <span>Content level</span>
+            <div className="content-level-grid" role="group" aria-label="Content level">
+              {([
+                ["clean", "Clean", "Broad-release language"],
+                ["explicit", "Explicit", "Profanity and adult themes"],
+                ["raw-adult", "Raw Adult", "Maximum adult creative freedom"],
+              ] as const).map(([level, label, description]) => (
+                <button
+                  className={`content-level-card ${request.contentLevel === level ? "active" : ""}`}
+                  key={level}
+                  type="button"
+                  onClick={() => updateRequest("contentLevel", level as ContentLevel)}
+                >
+                  <strong>{label}</strong>
+                  <span>{description}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <label className="field">

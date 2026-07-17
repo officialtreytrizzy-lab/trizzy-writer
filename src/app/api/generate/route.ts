@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateWithModel } from "@/lib/model";
 import { buildSystemPrompt, buildUserPrompt } from "@/lib/prompt";
-import { MODE_IDS, type GenerateRequest, type GenerateResponse } from "@/lib/types";
+import { CONTENT_LEVELS, MODE_IDS, type GenerateRequest, type GenerateResponse } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +14,7 @@ const requestSchema = z.object({
   lockedLyrics: z.string().max(15000).default(""),
   maxCharacters: z.number().int().min(300).max(12000),
   creativity: z.number().min(0).max(1.2),
+  contentLevel: z.enum(CONTENT_LEVELS).default("explicit"),
 });
 
 function containsLockedText(text: string, lockedLyrics: string): boolean {

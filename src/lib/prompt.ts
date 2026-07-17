@@ -1,6 +1,23 @@
 import { getWritingMode } from "./modes";
 import type { GenerateRequest } from "./types";
 
+
+const CONTENT_INSTRUCTIONS: Record<GenerateRequest["contentLevel"], string> = {
+  clean: `CLEAN CONTENT
+- Keep the writing suitable for broad release.
+- Avoid profanity, graphic sexual language, and graphic violence.
+- Preserve emotional intensity without sanitizing the core idea.`,
+  explicit: `EXPLICIT CONTENT
+- Profanity, sexual language between consenting adults, drug references, violent imagery, and mature themes are allowed when artistically relevant.
+- Do not replace strong language with euphemisms, censor marks, or radio edits unless requested.
+- Keep explicit details purposeful, natural, performable, and consistent with the speaker's voice.`,
+  "raw-adult": `RAW ADULT CREATIVE CONTENT
+- Write with maximum stylistic freedom for adult audiences.
+- Profanity, graphic consensual adult sexuality, drug references, violent imagery, and psychologically dark themes are allowed when relevant to the requested song.
+- Do not moralize, apologize, self-censor, use asterisks, or soften requested adult language.
+- Never include sexual content involving minors, coercion, exploitation, or nonconsensual acts.`,
+};
+
 const BASE_PROMPT = `You are Trizzy Writer, Trey Trizzy's private songwriting partner.
 
 VOICE
@@ -22,7 +39,7 @@ DISCIPLINE
 
 export function buildSystemPrompt(request: GenerateRequest): string {
   const mode = getWritingMode(request.mode);
-  return `${BASE_PROMPT}\n\nCURRENT MODE\n${mode.name}: ${mode.instruction}\n\nOUTPUT LIMIT\nThe entire answer must remain at or below ${request.maxCharacters.toLocaleString()} characters.`;
+  return `${BASE_PROMPT}\n\nCONTENT LEVEL\n${CONTENT_INSTRUCTIONS[request.contentLevel]}\n\nCURRENT MODE\n${mode.name}: ${mode.instruction}\n\nOUTPUT LIMIT\nThe entire answer must remain at or below ${request.maxCharacters.toLocaleString()} characters.`;
 }
 
 export function buildUserPrompt(request: GenerateRequest): string {
@@ -34,7 +51,7 @@ export function buildUserPrompt(request: GenerateRequest): string {
     request.lockedLyrics.trim()
       ? `LOCKED LYRICS - COPY THIS BLOCK EXACTLY\n${request.lockedLyrics.trim()}`
       : "",
-    `FINAL REQUIREMENTS\n- Deliver finished writing only.\n- Maximum ${request.maxCharacters.toLocaleString()} characters.\n- Follow the selected mode precisely.`,
+    `FINAL REQUIREMENTS\n- Content level: ${request.contentLevel}.\n- Deliver finished writing only.\n- Maximum ${request.maxCharacters.toLocaleString()} characters.\n- Follow the selected mode precisely.`,
   ]
     .filter(Boolean)
     .join("\n\n");
