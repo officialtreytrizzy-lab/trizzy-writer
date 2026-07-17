@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { saveDecisionToFirebase } from "@/lib/firebase/data";
 import { WRITING_MODES } from "@/lib/modes";
 import { analyzeLyrics } from "@/lib/lyric-analysis";
+import { VideoDirector } from "@/components/VideoDirector";
 import type {
   DecisionRecord,
   DecisionStatus,
@@ -502,6 +503,8 @@ export default function Home() {
         </section>
       </section>
 
+      <VideoDirector lyrics={output} />
+
       <section className="stats-row">
         <article>
           <strong>{history.length}</strong>
@@ -549,3 +552,5 @@ export default function Home() {
     </main>
   );
 }
+
+
