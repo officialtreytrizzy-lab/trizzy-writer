@@ -1,28 +1,36 @@
 node_modules/
 .next/
 dist/
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# Local environment and credentials
 .env
 .env.*
 !.env.example
-*.log
-.DS_Store
-
-# Private credentials
-credentials.json
-token.json
 firebase-adminsdk*.json
 service-account*.json
+credentials.json
+token.json
 
-# Private creative and training data
-data/*.jsonl
-data/private/
+# Private creative material and datasets
+data/
+private-data/
 songs/
 exports/
+*.jsonl
 
-# Model files and caches
+# Model files and adapters
+.ollama/
+models/
+adapters/
 *.gguf
 *.safetensors
 *.bin
 *.ckpt
 *.pt
-.ollama/
+
+# Editor and local tooling
+.vscode/
+.idea/
