@@ -112,3 +112,7 @@ Never commit:
 
 The reusable Google Colab worker foundation is located at `notebooks/Trizzy_Writer_WAN21_Colab_Worker.ipynb`. Open it in Google Colab, select a GPU runtime, and run the setup cells to create the Google Drive render queue.
 
+
+### WAN 2.1 worker capabilities
+
+The notebook now includes a pinned Diffusers WAN 2.1 T2V 1.3B runtime, persistent Drive model caching, validated JSON render jobs, one-shot and continuous queue processing, MP4 export, and progress/failure status files. Colab must remain connected while the worker is processing jobs.
