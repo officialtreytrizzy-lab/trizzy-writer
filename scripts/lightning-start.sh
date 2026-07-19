@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# npm injects a stale prefix into lifecycle scripts on Lightning Studios.
+unset npm_config_prefix NPM_CONFIG_PREFIX
+NODE_BIN="$(dirname "$(command -v node)")"
+export PATH="$NODE_BIN:$PATH"
+
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODEL_PATH="${TRIZZY_GGUF_MODEL_PATH:-$ROOT_DIR/models/qwen3-1.7b-q4.gguf}"
 RUNTIME_DIR="$ROOT_DIR/.runtime"

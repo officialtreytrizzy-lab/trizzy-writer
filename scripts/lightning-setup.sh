@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# npm injects a stale prefix into lifecycle scripts on Lightning Studios.
+unset npm_config_prefix NPM_CONFIG_PREFIX
+NODE_BIN="$(dirname "$(command -v node)")"
+export PATH="$NODE_BIN:$PATH"
+
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODEL_DIR="$ROOT_DIR/models"
 MODEL_PATH="$MODEL_DIR/qwen3-1.7b-q4.gguf"
@@ -29,7 +35,7 @@ if [[ ! -s "$MODEL_PATH" ]]; then
   ollama pull "$OLLAMA_MODEL"
 
   MODEL_BLOB="$(ollama show "$OLLAMA_MODEL" --modelfile | sed -n 's/^FROM //p' | head -n 1)"
-  if [[ -z "$MODEL_BLOB" || ! -f "$MODEL_BLOB" ]]; then
+  if [[ -z "$MODEL_BLOB" ]] || ! sudo test -f "$MODEL_BLOB"; then
     echo "Could not resolve the downloaded GGUF model path." >&2
     exit 1
   fi
