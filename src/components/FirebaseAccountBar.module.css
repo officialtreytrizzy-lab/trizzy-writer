@@ -1,0 +1,221 @@
+.shell,
+.localBar {
+  width: min(1560px, calc(100% - 48px));
+  margin: 18px auto 0;
+  border: 1px solid rgba(112, 255, 156, 0.18);
+  border-radius: 18px;
+  background: rgba(8, 14, 10, 0.78);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px);
+}
+
+.localBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #9eb3a4;
+  font-size: 0.82rem;
+}
+
+.localBar strong {
+  color: #f4fff6;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 14px 12px 16px;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.identity div {
+  min-width: 0;
+}
+
+.identity strong,
+.identity span {
+  display: block;
+}
+
+.identity strong {
+  color: #f4fff6;
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identity span {
+  margin-top: 2px;
+  color: #91a498;
+  font-size: 0.72rem;
+}
+
+.dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ffd66b;
+  box-shadow: 0 0 16px currentColor;
+}
+
+.online {
+  background: #2cff70;
+}
+
+.actions button,
+.panel button,
+.form input {
+  font: inherit;
+}
+
+.actions button,
+.panel button {
+  border: 1px solid rgba(112, 255, 156, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #f4fff6;
+  cursor: pointer;
+}
+
+.actions button {
+  padding: 9px 13px;
+}
+
+.actions button:disabled,
+.panel button:disabled,
+.form input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.panel {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+  border-top: 1px solid rgba(112, 255, 156, 0.1);
+}
+
+.googleButton,
+.submitButton,
+.guestButton {
+  min-height: 44px;
+  padding: 10px 14px;
+}
+
+.googleButton {
+  margin-top: 14px;
+  border-color: rgba(112, 255, 156, 0.34) !important;
+  background: rgba(112, 255, 156, 0.09) !important;
+  color: #70ff9c !important;
+  font-weight: 800 !important;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #74847a;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(112, 255, 156, 0.1);
+}
+
+.modeSwitch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.modeSwitch button {
+  min-height: 38px;
+}
+
+.modeSwitch .active {
+  border-color: rgba(112, 255, 156, 0.34);
+  background: rgba(112, 255, 156, 0.1);
+  color: #70ff9c;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 9px;
+}
+
+.form input {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid rgba(112, 255, 156, 0.15);
+  border-radius: 12px;
+  outline: none;
+  background: rgba(0, 0, 0, 0.28);
+  color: #f4fff6;
+  padding: 0 12px;
+}
+
+.form input:focus {
+  border-color: rgba(112, 255, 156, 0.38);
+  box-shadow: 0 0 0 3px rgba(112, 255, 156, 0.06);
+}
+
+.submitButton {
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #70ff9c, #28d965) !important;
+  color: #041108 !important;
+  font-weight: 900 !important;
+}
+
+.guestButton {
+  justify-self: start;
+  color: #9eb3a4 !important;
+}
+
+.message {
+  margin: 0;
+  padding: 0 16px 14px;
+  color: #b9c9bd;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .shell,
+  .localBar {
+    width: calc(100% - 28px);
+  }
+
+  .summary {
+    align-items: flex-start;
+  }
+
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .submitButton {
+    width: 100%;
+  }
+
+  .localBar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
