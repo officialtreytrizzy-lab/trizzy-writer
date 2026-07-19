@@ -39,8 +39,8 @@ jobs:
       - name: Type-check
         run: npm run typecheck
 
-      - name: Validate CPU worker syntax
-        run: python -m py_compile space/app.py
+      - name: Validate Python deployment code
+        run: python -m py_compile space/app.py scripts/deploy_hf_space.py
 
       - name: Build application
         run: npm run build
