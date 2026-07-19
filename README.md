@@ -1,26 +1,30 @@
 # Trizzy Writer
 
-Trizzy Writer is Trey Trizzy's private AI songwriting workspace. The public repository contains application code only. Private lyrics, credentials, datasets, adapters, and model weights stay outside Git.
+Trizzy Writer is Trey Trizzy's private AI songwriting workspace. This public repository contains application code only. Private lyrics, credentials, datasets, adapters, and model weights stay outside Git.
 
-## Phase 1 features
+## Current Phase 1 features
 
 - Full Song, Cadence Remix, Hook Lab, Bar Polish, and Locked Revision modes
+- Clean, Explicit, and Raw Adult content controls
 - Locked lyric verification with one automatic repair pass
 - Character-limit validation with one automatic repair pass
 - Editable final output with copy and text export
-- Approve and reject tracking
+- Approve and reject tracking with detailed ratings and notes
+- Automatic lyric analysis stored with each decision
 - JSONL export for future QLoRA fine-tuning
-- Firebase anonymous authentication and Firestore sync when configured
-- Local-only fallback when Firebase is not configured
-- Local Ollama support and hosted OpenAI-compatible endpoint support
+- Firebase Google, email/password, and anonymous authentication
+- Per-user Firestore decision storage when Firebase is configured
+- Local-only history and decision fallback when Firebase is not configured
+- Local Ollama and hosted OpenAI-compatible model support
 - Mobile-responsive interface
+- GitHub Actions type-check and production-build validation
 
 ## Local setup
 
 Requirements:
 
 - Node.js 20.9 or newer
-- Ollama
+- Ollama, when using a local model
 
 Install the application:
 
@@ -28,7 +32,7 @@ Install the application:
 npm install
 ```
 
-Download the default model:
+Download the default local model:
 
 ```bash
 ollama pull qwen3:1.7b
@@ -37,16 +41,29 @@ ollama pull qwen3:1.7b
 Create the local environment file:
 
 ```bash
+cp .env.example .env.local
+```
+
+On Windows Command Prompt, use:
+
+```bat
 copy .env.example .env.local
 ```
 
-Start the app:
+Start the development server:
 
 ```bash
-npm run dev
+npm run dev:hot
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:876`.
+
+For a production-style local run:
+
+```bash
+npm run build
+npm run start
+```
 
 ## Model providers
 
@@ -58,36 +75,66 @@ TRIZZY_MODEL_API_URL=http://127.0.0.1:11434/api/chat
 TRIZZY_MODEL_NAME=qwen3:1.7b
 ```
 
-### Hosted Hugging Face Space
+### Hosted Hugging Face Space or another compatible server
 
-The Space must expose an OpenAI-compatible `/v1/chat/completions` endpoint.
+The server must expose an OpenAI-compatible `/v1/chat/completions` endpoint.
 
 ```text
 TRIZZY_MODEL_PROVIDER=openai-compatible
-TRIZZY_MODEL_API_URL=https://YOUR-SPACE.hf.space
+TRIZZY_MODEL_API_URL=https://YOUR-ENDPOINT.example
 TRIZZY_MODEL_API_TOKEN=
 TRIZZY_MODEL_NAME=trizzy-writer
 ```
 
-Tokens remain server-side and are never exposed through `NEXT_PUBLIC_` variables.
+Model tokens remain server-side and must never use a `NEXT_PUBLIC_` environment variable.
 
-## Firebase
+## Firebase setup
 
-Create a Firebase project, enable Anonymous Authentication, and create a Firestore database. Add the Firebase web configuration values to `.env.local`.
-
-Deploy the included security rules with the Firebase CLI:
+1. Create a Firebase project.
+2. Add a Web App inside the project.
+3. Enable these Authentication providers:
+   - Google
+   - Email/Password
+   - Anonymous
+4. Create a Cloud Firestore database.
+5. Copy the Firebase Web App configuration into `.env.local`.
+6. Install the Firebase CLI and deploy the included Firestore configuration.
 
 ```bash
+npm install -g firebase-tools
+firebase login
+firebase use YOUR_FIREBASE_PROJECT_ID
 firebase deploy --only firestore
 ```
 
-Every user can only read and write records under their own `users/{uid}` path.
+The included Firestore rules restrict every user's documents to that authenticated user's `users/{uid}` path.
+
+Firebase browser configuration values identify the Firebase project but are not administrator secrets. Service-account files and private keys must still remain outside Git.
+
+## Authentication behavior
+
+- With no Firebase configuration, Trizzy Writer remains in local mode.
+- A guest session uses Firebase Anonymous Authentication.
+- Connecting Google or creating an email account upgrades an anonymous session when possible.
+- Approved and rejected examples sync beneath the authenticated user's Firestore path.
 
 ## Training data
 
 After editing a model result, press **Approve** or **Reject**. Decisions are stored locally and optionally synced to Firestore. Press **Export dataset** to download approved examples as JSONL.
 
-Do not approve drafts that still contain mistakes. Fine-tuning quality depends on the quality of the approved examples.
+Only approve writing that is genuinely correct. Rejected drafts and unfinished revisions should not enter the fine-tuning dataset.
+
+Recommended private storage:
+
+```text
+Google Drive/
+└── Trizzy Writer/
+    ├── training-data/
+    ├── adapters/
+    ├── models/
+    ├── exports/
+    └── backups/
+```
 
 ## Validation
 
@@ -95,6 +142,8 @@ Do not approve drafts that still contain mistakes. Fine-tuning quality depends o
 npm run typecheck
 npm run build
 ```
+
+GitHub Actions runs both checks on pushes and pull requests targeting `main`.
 
 ## Repository safety
 
@@ -107,12 +156,10 @@ Never commit:
 - JSONL datasets
 - GGUF or SafeTensors model files
 - LoRA adapters
+- Private exports or backups
 
-## Video rendering notebook
+## Google Colab
 
-The reusable Google Colab worker foundation is located at `notebooks/Trizzy_Writer_WAN21_Colab_Worker.ipynb`. Open it in Google Colab, select a GPU runtime, and run the setup cells to create the Google Drive render queue.
+Google Colab is intended for dataset preparation, fine-tuning, evaluation, adapter merging, and GGUF conversion. It is not used as the permanent public API because free Colab runtimes disconnect and should not be treated as always-on hosting.
 
-
-### WAN 2.1 worker capabilities
-
-The notebook now includes a pinned Diffusers WAN 2.1 T2V 1.3B runtime, persistent Drive model caching, validated JSON render jobs, one-shot and continuous queue processing, MP4 export, and progress/failure status files. Colab must remain connected while the worker is processing jobs.
+The repository may include experimental notebooks for other Trey Trizzy media workflows. Those notebooks are separate from the core songwriting application and do not change the Trizzy Writer model architecture.
