@@ -22,6 +22,10 @@ function containsLockedText(text: string, lockedLyrics: string): boolean {
   return !locked || text.includes(locked);
 }
 
+function tokenBudgetForCharacters(maxCharacters: number): number {
+  return Math.min(1600, Math.max(96, Math.ceil(maxCharacters / 3.5) + 32));
+}
+
 async function repairDraft(
   request: GenerateRequest,
   draft: string,
@@ -46,6 +50,8 @@ async function repairDraft(
       { role: "user", content: repairPrompt },
     ],
     Math.max(0.2, request.creativity - 0.2),
+    undefined,
+    { maxTokens: tokenBudgetForCharacters(request.maxCharacters) },
   );
 }
 
@@ -64,6 +70,7 @@ export async function POST(
     }
 
     const request = parsed.data;
+    const maxTokens = tokenBudgetForCharacters(request.maxCharacters);
     let result = await generateWithModel(
       [
         { role: "system", content: buildSystemPrompt(request) },
@@ -71,6 +78,7 @@ export async function POST(
       ],
       request.creativity,
       requestObject.signal,
+      { maxTokens },
     );
 
     const repairProblems: string[] = [];

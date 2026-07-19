@@ -7,7 +7,8 @@ Trizzy Writer is Trey Trizzy's private AI songwriting workspace. This public rep
 - Full Song, Cadence Remix, Hook Lab, Bar Polish, and Locked Revision modes
 - Clean, Explicit, and Raw Adult content controls
 - Locked lyric verification with one automatic repair pass
-- Character-limit validation with one automatic repair pass
+- Character-limit validation with a CPU-aware token budget
+- Qwen non-thinking mode with defensive reasoning removal
 - Editable final output with copy and text export
 - Approve and reject tracking with detailed ratings and notes
 - Automatic lyric analysis stored with each decision
@@ -15,33 +16,78 @@ Trizzy Writer is Trey Trizzy's private AI songwriting workspace. This public rep
 - Firebase Google, email/password, and anonymous authentication
 - Per-user Firestore decision storage when Firebase is configured
 - Local-only history and decision fallback when Firebase is not configured
-- Local Ollama and hosted OpenAI-compatible model support
+- Local Ollama and OpenAI-compatible model-server support
 - Mobile-responsive interface
 - GitHub Actions type-check and production-build validation
 
-## Local setup
+## Lightning AI free CPU deployment
+
+Lightning runs Qwen3 1.7B Q4 through `llama-cpp-python`. Ollama is used only to download the public GGUF model because its bundled inference runner is not stable on every Lightning virtual CPU.
+
+### First-time setup
+
+Open a free CPU Studio, clone this repository, and run:
+
+```bash
+cd trizzy-writer
+npm run lightning:setup
+npm run lightning:start
+```
+
+The setup process:
+
+1. Installs Node dependencies.
+2. Installs the prebuilt CPU `llama-cpp-python` server.
+3. Downloads Qwen3 1.7B Q4.
+4. Copies the GGUF into persistent Studio storage.
+5. Builds the production Next.js app.
+
+The start command launches:
+
+- CPU model server on private port `8000`
+- Trizzy Writer on public port `3000`
+- Qwen non-thinking mode through `enable_thinking=false`
+
+Add port `3000` to Lightning's Port Viewer and name it **Trizzy Writer**.
+
+### After a free-tier restart
+
+Files and model weights remain in the Studio workspace. Restart both services with:
+
+```bash
+npm run lightning:start
+```
+
+Check status:
+
+```bash
+npm run lightning:status
+```
+
+Run a real lyric-generation smoke test:
+
+```bash
+npm run lightning:smoke
+```
+
+Stop both services:
+
+```bash
+npm run lightning:stop
+```
+
+## Local development with Ollama
 
 Requirements:
 
 - Node.js 20.9 or newer
 - Ollama, when using a local model
 
-Install the application:
-
 ```bash
 npm install
-```
-
-Download the default local model:
-
-```bash
 ollama pull qwen3:1.7b
-```
-
-Create the local environment file:
-
-```bash
 cp .env.example .env.local
+npm run dev
 ```
 
 On Windows Command Prompt, use:
@@ -50,13 +96,7 @@ On Windows Command Prompt, use:
 copy .env.example .env.local
 ```
 
-Start the development server:
-
-```bash
-npm run dev:hot
-```
-
-Open `http://localhost:876`.
+Open `http://localhost:3000`.
 
 For a production-style local run:
 
@@ -75,24 +115,24 @@ TRIZZY_MODEL_API_URL=http://127.0.0.1:11434/api/chat
 TRIZZY_MODEL_NAME=qwen3:1.7b
 ```
 
-### Hosted Hugging Face Space or another compatible server
+### OpenAI-compatible server
 
-The server must expose an OpenAI-compatible `/v1/chat/completions` endpoint.
+The server must expose `/v1/models` and `/v1/chat/completions`.
 
 ```text
 TRIZZY_MODEL_PROVIDER=openai-compatible
-TRIZZY_MODEL_API_URL=https://YOUR-ENDPOINT.example
+TRIZZY_MODEL_API_URL=http://127.0.0.1:8000
 TRIZZY_MODEL_API_TOKEN=
 TRIZZY_MODEL_NAME=trizzy-writer
 ```
 
-Model tokens remain server-side and must never use a `NEXT_PUBLIC_` environment variable.
+A hosted Hugging Face Space or another compatible endpoint can replace the local URL. Model tokens remain server-side and must never use a `NEXT_PUBLIC_` environment variable.
 
 ## Firebase setup
 
 1. Create a Firebase project.
 2. Add a Web App inside the project.
-3. Enable these Authentication providers:
+3. Enable the desired Authentication providers:
    - Google
    - Email/Password
    - Anonymous
@@ -158,8 +198,8 @@ Never commit:
 - LoRA adapters
 - Private exports or backups
 
-## Google Colab
+## Google Colab and video rendering
 
-Google Colab is intended for dataset preparation, fine-tuning, evaluation, adapter merging, and GGUF conversion. It is not used as the permanent public API because free Colab runtimes disconnect and should not be treated as always-on hosting.
+Google Colab is intended for dataset preparation, fine-tuning, evaluation, adapter merging, GGUF conversion, and temporary GPU media work. It is not used as the permanent public API because free Colab runtimes disconnect.
 
-The repository may include experimental notebooks for other Trey Trizzy media workflows. Those notebooks are separate from the core songwriting application and do not change the Trizzy Writer model architecture.
+The reusable WAN worker is located at `notebooks/Trizzy_Writer_WAN21_Colab_Worker.ipynb`. It is separate from the core songwriting inference service.

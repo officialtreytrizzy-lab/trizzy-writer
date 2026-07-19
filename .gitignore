@@ -4,11 +4,13 @@ dist/
 *.log
 *.tsbuildinfo
 .DS_Store
+.runtime/
 
 # Local environment and credentials
 .env
 .env.*
 !.env.example
+!.env.lightning.example
 firebase-adminsdk*.json
 service-account*.json
 credentials.json
@@ -34,3 +36,6 @@ adapters/
 # Editor and local tooling
 .vscode/
 .idea/
+
+__pycache__/
+*.pyc

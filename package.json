@@ -1,14 +1,19 @@
 {
   "name": "trizzy-writer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
-    "dev": "npm run build && next start --hostname 0.0.0.0 --port 876",
+    "dev": "next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
-    "start": "next start --hostname 0.0.0.0 --port 876",
+    "start": "next start --hostname 0.0.0.0 --port 3000",
     "typecheck": "tsc --noEmit",
-    "dev:turbopack": "next dev --hostname 0.0.0.0 --port 876",
-    "dev:hot": "next dev --webpack --hostname 0.0.0.0 --port 876"
+    "dev:turbopack": "next dev --hostname 0.0.0.0 --port 3000",
+    "dev:hot": "next dev --webpack --hostname 0.0.0.0 --port 3000",
+    "lightning:setup": "bash scripts/lightning-setup.sh",
+    "lightning:start": "bash scripts/lightning-start.sh",
+    "lightning:status": "bash scripts/lightning-status.sh",
+    "lightning:stop": "bash scripts/lightning-stop.sh",
+    "lightning:smoke": "python3 scripts/lightning-smoke.py"
   },
   "dependencies": {
     "firebase": "^12.0.0",

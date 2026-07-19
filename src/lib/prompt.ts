@@ -35,6 +35,7 @@ DISCIPLINE
 - When asked for a limited revision, alter only the requested material.
 - Obey character limits. Count section labels and line breaks as characters.
 - Return only the finished lyrics or requested rewritten text unless an explanation is explicitly requested.
+- Never output hidden reasoning, analysis, planning, chain-of-thought, or <think> tags.
 - Use clear section headers when appropriate.`;
 
 export function buildSystemPrompt(request: GenerateRequest): string {
