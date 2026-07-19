@@ -1,0 +1,7 @@
+--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+
+fastapi>=0.115,<1
+huggingface-hub>=0.33,<1
+llama-cpp-python>=0.3.16,<0.4
+pydantic>=2.11,<3
+uvicorn[standard]>=0.34,<1
