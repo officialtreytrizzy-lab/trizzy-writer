@@ -1,7 +1,22 @@
 "use client";
 
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, signInAnonymously, type Auth, type User } from "firebase/auth";
+import {
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  getAuth,
+  linkWithCredential,
+  linkWithPopup,
+  onAuthStateChanged,
+  signInAnonymously,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  type Auth,
+  type Unsubscribe,
+  type User,
+} from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -36,6 +51,15 @@ export function getFirebaseServices(): FirebaseServices | null {
   return services;
 }
 
+export function observeFirebaseUser(callback: (user: User | null) => void): Unsubscribe {
+  const current = getFirebaseServices();
+  if (!current) {
+    callback(null);
+    return () => undefined;
+  }
+  return onAuthStateChanged(current.auth, callback);
+}
+
 export async function ensureFirebaseUser(): Promise<User | null> {
   const current = getFirebaseServices();
   if (!current) return null;
@@ -43,4 +67,65 @@ export async function ensureFirebaseUser(): Promise<User | null> {
 
   const credential = await signInAnonymously(current.auth);
   return credential.user;
+}
+
+export async function signInAsGuest(): Promise<User> {
+  const current = getFirebaseServices();
+  if (!current) throw new Error("Firebase is not configured.");
+  const credential = await signInAnonymously(current.auth);
+  return credential.user;
+}
+
+export async function signInWithGoogle(): Promise<User> {
+  const current = getFirebaseServices();
+  if (!current) throw new Error("Firebase is not configured.");
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  const activeUser = current.auth.currentUser;
+
+  if (activeUser?.isAnonymous) {
+    try {
+      const linked = await linkWithPopup(activeUser, provider);
+      return linked.user;
+    } catch (error) {
+      const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+      if (!code.includes("credential-already-in-use") && !code.includes("email-already-in-use")) {
+        throw error;
+      }
+      await signOut(current.auth);
+    }
+  }
+
+  const credential = await signInWithPopup(current.auth, provider);
+  return credential.user;
+}
+
+export async function signInWithEmail(email: string, password: string): Promise<User> {
+  const current = getFirebaseServices();
+  if (!current) throw new Error("Firebase is not configured.");
+  const credential = await signInWithEmailAndPassword(current.auth, email.trim(), password);
+  return credential.user;
+}
+
+export async function createEmailAccount(email: string, password: string): Promise<User> {
+  const current = getFirebaseServices();
+  if (!current) throw new Error("Firebase is not configured.");
+
+  const normalizedEmail = email.trim();
+  const activeUser = current.auth.currentUser;
+  if (activeUser?.isAnonymous) {
+    const credential = EmailAuthProvider.credential(normalizedEmail, password);
+    const linked = await linkWithCredential(activeUser, credential);
+    return linked.user;
+  }
+
+  const created = await createUserWithEmailAndPassword(current.auth, normalizedEmail, password);
+  return created.user;
+}
+
+export async function signOutFirebase(): Promise<void> {
+  const current = getFirebaseServices();
+  if (!current) return;
+  await signOut(current.auth);
 }
