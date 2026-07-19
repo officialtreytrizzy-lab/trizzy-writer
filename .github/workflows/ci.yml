@@ -28,11 +28,19 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install dependencies
         run: npm ci
 
       - name: Type-check
         run: npm run typecheck
+
+      - name: Validate CPU worker syntax
+        run: python -m py_compile space/app.py
 
       - name: Build application
         run: npm run build
