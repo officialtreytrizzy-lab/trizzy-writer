@@ -17,7 +17,14 @@
     "check:ar": "node scripts/check-inside-ar.mjs",
     "check:assistant": "npx tsx scripts/check-unified-assistant.ts",
     "vault:index": "npx tsx scripts/index-current-repo.ts",
-    "vault:seed": "npx tsx scripts/seed-trey-knowledge.ts"
+    "vault:seed": "npx tsx scripts/seed-trey-knowledge.ts",
+    "train:data": "npx tsx scripts/build-training-dataset.ts",
+    "train:validate": "npx tsx scripts/build-training-dataset.ts --check",
+    "train:preflight": "python3 training/preflight.py",
+    "train:qlora": "python3 training/train_qlora.py",
+    "train:evaluate": "python3 training/evaluate_adapter.py",
+    "train:merge": "python3 training/merge_adapter.py",
+    "train:export-gguf": "bash training/export_gguf.sh"
   },
   "dependencies": {
     "firebase": "^12.0.0",

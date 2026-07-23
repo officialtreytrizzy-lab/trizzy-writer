@@ -1,0 +1,10 @@
+torch>=2.4,<3
+transformers>=4.51,<6
+accelerate>=1.4,<2
+bitsandbytes>=0.45,<1
+datasets>=3.5,<5
+peft>=0.15,<1
+trl>=0.18,<1
+safetensors>=0.5,<1
+sentencepiece>=0.2,<1
+huggingface_hub>=0.30,<2

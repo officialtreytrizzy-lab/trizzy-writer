@@ -43,3 +43,11 @@ __pycache__/
 # Private Trey AI knowledge vault
 knowledge/private/
 
+
+# Fine-tuning artifacts
+training/data/
+training/output/
+training/merged/
+training/reports/
+training/exports/
+training/cache/
