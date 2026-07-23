@@ -49,10 +49,12 @@ def main() -> None:
 
     train_rows = count_jsonl(train_path) if train_path.exists() else 0
     eval_rows = count_jsonl(eval_path) if eval_path.exists() else 0
-    if train_rows < 75:
-        problems.append(f"Training split is too small: {train_rows}")
-    if eval_rows < 10:
-        problems.append(f"Evaluation split is too small: {eval_rows}")
+    minimum_train_rows = int(config.get("minimum_train_rows", 75))
+    minimum_eval_rows = int(config.get("minimum_eval_rows", 10))
+    if train_rows < minimum_train_rows:
+        problems.append(f"Training split is too small: {train_rows} < {minimum_train_rows}")
+    if eval_rows < minimum_eval_rows:
+        problems.append(f"Evaluation split is too small: {eval_rows} < {minimum_eval_rows}")
 
     packages = ["torch", "transformers", "accelerate", "bitsandbytes", "datasets", "peft", "trl"]
     package_status = {name: bool(importlib.util.find_spec(name)) for name in packages}

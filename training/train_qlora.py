@@ -20,7 +20,7 @@ from typing import Any
 
 import torch
 from datasets import load_dataset
-from peft import LoraConfig, prepare_model_for_kbit_training
+from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, set_seed
 from trl import SFTConfig, SFTTrainer
 
@@ -187,18 +187,26 @@ def main() -> None:
     if "gradient_checkpointing_kwargs" in inspect.signature(prepare_model_for_kbit_training).parameters:
         prepare_kwargs["gradient_checkpointing_kwargs"] = {"use_reentrant": False}
     model = prepare_model_for_kbit_training(model, **prepare_kwargs)
+    adapter_path_value = config.get("adapter_path")
+    adapter_path = resolve_path(adapter_path_value) if adapter_path_value else None
+    if adapter_path is not None:
+        if not adapter_path.exists():
+            raise FileNotFoundError(f"Continuation adapter does not exist: {adapter_path}")
+        model = PeftModel.from_pretrained(model, str(adapter_path), is_trainable=True)
 
     train_dataset = load_dataset("json", data_files=str(train_path), split="train")
     eval_dataset = load_dataset("json", data_files=str(eval_path), split="train")
 
-    lora_config = LoraConfig(
-        r=int(config["lora_r"]),
-        lora_alpha=int(config["lora_alpha"]),
-        lora_dropout=float(config["lora_dropout"]),
-        target_modules=config["target_modules"],
-        bias="none",
-        task_type="CAUSAL_LM",
-    )
+    lora_config = None
+    if adapter_path is None:
+        lora_config = LoraConfig(
+            r=int(config["lora_r"]),
+            lora_alpha=int(config["lora_alpha"]),
+            lora_dropout=float(config["lora_dropout"]),
+            target_modules=config["target_modules"],
+            bias="none",
+            task_type="CAUSAL_LM",
+        )
 
     sft_config = make_sft_config(config, output_dir, use_bf16)
     if args.max_steps is not None:
@@ -214,8 +222,9 @@ def main() -> None:
         "eval_dataset": eval_dataset,
         "processing_class": tokenizer,
         "tokenizer": tokenizer,
-        "peft_config": lora_config,
     }
+    if lora_config is not None:
+        trainer_candidates["peft_config"] = lora_config
     trainer = SFTTrainer(**supported_kwargs(SFTTrainer, trainer_candidates))
 
     train_result = trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
