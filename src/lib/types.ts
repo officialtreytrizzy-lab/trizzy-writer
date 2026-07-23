@@ -13,12 +13,14 @@ export const CONTENT_LEVELS = ["clean", "explicit", "raw-adult"] as const;
 export type ContentLevel = (typeof CONTENT_LEVELS)[number];
 
 export const AR_CONSULTATION_FOCUS_IDS = [
+  "quick-verdict",
   "career-audit",
   "song-evaluation",
   "release-strategy",
   "trace-development",
   "brand-content",
   "deal-business",
+  "weekly-intelligence",
   "first-run-assignment",
 ] as const;
 
