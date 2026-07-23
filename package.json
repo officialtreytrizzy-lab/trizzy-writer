@@ -15,7 +15,8 @@
     "lightning:stop": "bash scripts/lightning-stop.sh",
     "lightning:smoke": "python3 scripts/lightning-smoke.py",
     "check:ar": "node scripts/check-inside-ar.mjs",
-    "check:assistant": "npx tsx scripts/check-unified-assistant.ts"
+    "check:assistant": "npx tsx scripts/check-unified-assistant.ts",
+    "vault:index": "npx tsx scripts/index-current-repo.ts"
   },
   "dependencies": {
     "firebase": "^12.0.0",

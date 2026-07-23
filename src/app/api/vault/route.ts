@@ -1,0 +1,9 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { ASSISTANT_SPECIALTIES } from "@/lib/assistant/types";
+import { deleteVaultRecord, listVaultRecords, saveVaultRecord } from "@/lib/assistant/store";
+export const runtime="nodejs"; export const dynamic="force-dynamic";
+const saveSchema=z.object({id:z.string().optional(),kind:z.enum(["knowledge","memory","decision","conversation"]),title:z.string().min(1).max(300),text:z.string().min(1).max(100000),source:z.string().min(1).max(500),specialty:z.union([z.enum(ASSISTANT_SPECIALTIES),z.literal("all")]).optional(),tags:z.array(z.string().max(80)).max(30).optional(),status:z.enum(["active","final","superseded","draft"]).optional(),confidence:z.enum(["confirmed","inferred","unverified"]).optional(),sensitivity:z.enum(["private","confidential","highly-confidential"]).optional(),metadata:z.record(z.string(),z.unknown()).optional()});
+export async function GET(request:Request){const url=new URL(request.url);const kind=url.searchParams.get("kind") as "knowledge"|"memory"|"decision"|"conversation"|null;return NextResponse.json({records:await listVaultRecords(kind||undefined)});}
+export async function POST(request:Request){const parsed=saveSchema.safeParse(await request.json());if(!parsed.success)return NextResponse.json({error:parsed.error.issues[0]?.message||"Invalid record."},{status:400});return NextResponse.json({record:await saveVaultRecord(parsed.data)});}
+export async function DELETE(request:Request){const id=new URL(request.url).searchParams.get("id");if(!id)return NextResponse.json({error:"Missing id."},{status:400});return NextResponse.json({deleted:await deleteVaultRecord(id)});}
