@@ -39,7 +39,12 @@
     "train:v5-validate": "npx tsx scripts/build-remediation-v5-dataset.ts --check",
     "train:v5": "python3 training/train_qlora.py --config training/config.v5.json",
     "train:evaluate-v5": "python3 training/evaluate_adapter.py --config training/config.v5.json",
-    "train:merge-v5": "python3 training/merge_adapter.py --config training/config.v5.json"
+    "train:merge-v5": "python3 training/merge_adapter.py --config training/config.v5.json",
+    "train:v6-data": "npx tsx scripts/build-remediation-v5-dataset.ts",
+    "train:v6-validate": "npx tsx scripts/build-remediation-v5-dataset.ts --check",
+    "train:v6": "python3 training/train_qlora.py --config training/config.v6.json",
+    "train:evaluate-v6": "python3 training/evaluate_adapter.py --config training/config.v6.json",
+    "train:merge-v6": "python3 training/merge_adapter.py --config training/config.v6.json"
   },
   "dependencies": {
     "firebase": "^12.0.0",
