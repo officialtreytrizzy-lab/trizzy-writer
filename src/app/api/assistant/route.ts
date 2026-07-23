@@ -1,0 +1,19 @@
+﻿import { NextResponse } from "next/server";
+import { z } from "zod";
+import { generateWithModel } from "@/lib/model";
+import { routeAssistantRequest } from "@/lib/assistant/router";
+import { retrieveKnowledge } from "@/lib/assistant/knowledge";
+import { buildUnifiedAssistantPrompt } from "@/lib/assistant/prompt";
+import { ASSISTANT_SPECIALTIES, type AssistantResponse } from "@/lib/assistant/types";
+export const runtime = "nodejs"; export const dynamic = "force-dynamic"; export const maxDuration = 180;
+const schema = z.object({ message: z.string().trim().min(1).max(20000), history: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(20000) })).max(30).default([]), forceSpecialty: z.enum(ASSISTANT_SPECIALTIES).optional(), liveResearch: z.boolean().default(false) });
+export async function POST(request: Request): Promise<NextResponse<AssistantResponse | { error: string }>> {
+  try {
+    const parsed = schema.safeParse(await request.json());
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid request." }, { status: 400 });
+    const specialty = parsed.data.forceSpecialty || routeAssistantRequest(parsed.data.message);
+    const knowledge = await retrieveKnowledge(parsed.data.message, specialty);
+    const result = await generateWithModel([{ role: "system", content: buildUnifiedAssistantPrompt(specialty, knowledge.context) }, ...parsed.data.history.slice(-12), { role: "user", content: parsed.data.message }], specialty === "songwriting" ? 0.78 : 0.45, request.signal, { maxTokens: specialty === "inside-ar" || specialty === "coding" ? 2400 : 1800 });
+    return NextResponse.json({ text: result.text, specialty, model: result.model, provider: result.provider, citations: knowledge.citations, warnings: parsed.data.liveResearch ? ["Live research routing is not connected to the unified endpoint yet."] : [] });
+  } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "Assistant request failed." }, { status: 500 }); }
+}

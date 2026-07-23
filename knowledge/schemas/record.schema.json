@@ -1,0 +1,12 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trey AI Knowledge Record",
+  "type": "object",
+  "required": ["id", "title", "source", "text"],
+  "properties": {
+    "id": { "type": "string" }, "title": { "type": "string" }, "source": { "type": "string" }, "text": { "type": "string" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "specialty": { "enum": ["songwriting", "inside-ar", "catalog", "coding", "general", "all"] },
+    "updatedAt": { "type": "string" }
+  }
+}
