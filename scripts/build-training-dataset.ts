@@ -36,6 +36,7 @@ const ROOT = process.cwd();
 const SOURCE_PATHS = [
   path.join(ROOT, "training", "approved_examples.seed.json"),
   path.join(ROOT, "training", "applied_examples.seed.json"),
+  path.join(ROOT, "training", "behavior_drills.seed.json"),
 ];
 const OUTPUT_DIR = path.join(ROOT, "training", "data");
 const TRAIN_PATH = path.join(OUTPUT_DIR, "train.jsonl");
