@@ -16,7 +16,8 @@
     "lightning:smoke": "python3 scripts/lightning-smoke.py",
     "check:ar": "node scripts/check-inside-ar.mjs",
     "check:assistant": "npx tsx scripts/check-unified-assistant.ts",
-    "vault:index": "npx tsx scripts/index-current-repo.ts"
+    "vault:index": "npx tsx scripts/index-current-repo.ts",
+    "vault:seed": "npx tsx scripts/seed-trey-knowledge.ts"
   },
   "dependencies": {
     "firebase": "^12.0.0",
