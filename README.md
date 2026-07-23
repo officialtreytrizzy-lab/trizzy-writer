@@ -4,7 +4,10 @@ Trizzy Writer is Trey Trizzy's private AI songwriting workspace. This public rep
 
 ## Current Phase 1 features
 
-- Full Song, Cadence Remix, Hook Lab, Bar Polish, and Locked Revision modes
+- Full Song, Cadence Remix, Hook Lab, Bar Polish, Locked Revision, and private Inside A&R modes
+- Dedicated A&R focuses for career audits, song evaluation, release strategy, TRACE development, brand/content, deal review, and first-run assignments
+- Live public research through official pages, web search, and current music-news RSS with dated source IDs
+- Separate A&R feedback ratings so approved consultations become clean executive-training examples
 - Clean, Explicit, and Raw Adult content controls
 - Locked lyric verification with one automatic repair pass
 - Character-limit validation with a CPU-aware token budget
@@ -20,9 +23,33 @@ Trizzy Writer is Trey Trizzy's private AI songwriting workspace. This public rep
 - Mobile-responsive interface
 - GitHub Actions type-check and production-build validation
 
+## Inside A&R consultations
+
+Choose **Inside A&R** to switch Trizzy Writer from lyric generation into a private executive consultation workflow for Trey Trizzy and TRACE.
+
+The operating system includes:
+
+- Direct song and catalog evaluation with identity, hook, market-fit, performance, and release-readiness scoring
+- Solo and TRACE artist-development rules, including transparent treatment of Ace and Ced as virtual/AI members
+- Release-status verification, rollout hierarchy, catalog strategy, content conversion, and measurable action plans
+- Artist-first deal and rights review covering masters, publishing, splits, recoupment, exclusivity, AI clauses, virtual-member rights, and termination risk
+- A first-run assignment that audits current positioning and produces prioritized 30-day and 90-day plans
+- Evidence labels that distinguish verified facts, reasonable inferences, artistic judgment, and recommendations
+
+Live research is enabled by default only for Inside A&R mode. It sends fixed public-topic searches, not the user's private prompt or pasted material, to the configured public providers. Retrieved sources are returned to the interface and current factual claims are required to cite `[R#]` IDs.
+
+```text
+TRIZZY_RESEARCH_ENABLED=true
+TRIZZY_OFFICIAL_URLS=https://www.treytrizzy.com
+```
+
+Set `TRIZZY_RESEARCH_ENABLED=false` to force offline consultation behavior. Add additional official URLs as a comma-separated list.
+
+The full internal operating doctrine lives in `src/lib/ar-operating-system.ts`. The research adapter lives in `src/lib/research.ts`.
+
 ## Lightning AI free CPU deployment
 
-Lightning runs Qwen3 1.7B Q4 through `llama-cpp-python`. Ollama is used only to download the public GGUF model because its bundled inference runner is not stable on every Lightning virtual CPU.
+Lightning runs Qwen3 1.7B Q4 through `llama-cpp-python` with an 8K context window for full A&R consultations. Ollama is used only to download the public GGUF model because its bundled inference runner is not stable on every Lightning virtual CPU.
 
 ### First-time setup
 
@@ -179,6 +206,7 @@ Google Drive/
 ## Validation
 
 ```bash
+npm run check:ar
 npm run typecheck
 npm run build
 ```

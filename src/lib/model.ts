@@ -52,7 +52,7 @@ function inferProvider(url: string): "ollama" | "openai-compatible" {
 }
 
 function clampTokenBudget(value: number): number {
-  return Math.min(1800, Math.max(64, Math.round(value)));
+  return Math.min(2400, Math.max(64, Math.round(value)));
 }
 
 function applyNonThinkingSwitch(messages: ModelMessage[]): ModelMessage[] {
@@ -126,7 +126,7 @@ export async function generateWithModel(
           top_p: 0.8,
           top_k: 20,
           repeat_penalty: 1.08,
-          num_ctx: 4096,
+          num_ctx: 8192,
           num_predict: maxTokens,
         },
       }),

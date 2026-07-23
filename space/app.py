@@ -13,7 +13,7 @@ MODEL_REPO = os.getenv("HF_MODEL_REPO", "Qwen/Qwen3-1.7B-GGUF")
 MODEL_FILE = os.getenv("HF_MODEL_FILE", "Qwen3-1.7B-Q8_0.gguf")
 MODEL_ALIAS = os.getenv("TRIZZY_MODEL_NAME", "trizzy-writer")
 API_KEY = os.getenv("TRIZZY_SPACE_API_KEY", "").strip()
-N_CTX = int(os.getenv("N_CTX", "4096"))
+N_CTX = int(os.getenv("N_CTX", "8192"))
 N_THREADS = int(os.getenv("N_THREADS", str(max(1, (os.cpu_count() or 2) - 1))))
 N_BATCH = int(os.getenv("N_BATCH", "128"))
 
@@ -33,7 +33,7 @@ class ChatCompletionRequest(BaseModel):
     messages: list[ChatMessage] = Field(min_length=1)
     temperature: float = Field(default=0.78, ge=0, le=1.2)
     top_p: float = Field(default=0.92, gt=0, le=1)
-    max_tokens: int = Field(default=1400, ge=1, le=2400)
+    max_tokens: int = Field(default=1800, ge=1, le=2800)
     stream: bool = False
 
 

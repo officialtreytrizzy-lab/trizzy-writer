@@ -39,6 +39,9 @@ jobs:
       - name: Type-check
         run: npm run typecheck
 
+      - name: Validate Inside A&R operating system
+        run: npm run check:ar
+
       - name: Validate Python deployment code
         run: python -m py_compile space/app.py scripts/deploy_hf_space.py
 

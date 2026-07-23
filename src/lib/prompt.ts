@@ -1,6 +1,6 @@
-import { getWritingMode } from "./modes";
-import type { GenerateRequest } from "./types";
-
+import { buildInsideArSystemPrompt } from "./ar-operating-system";
+import { getArConsultationFocus, getWritingMode } from "./modes";
+import type { GenerateRequest, ResearchPacket } from "./types";
 
 const CONTENT_INSTRUCTIONS: Record<GenerateRequest["contentLevel"], string> = {
   clean: `CLEAN CONTENT
@@ -38,12 +38,49 @@ DISCIPLINE
 - Never output hidden reasoning, analysis, planning, chain-of-thought, or <think> tags.
 - Use clear section headers when appropriate.`;
 
-export function buildSystemPrompt(request: GenerateRequest): string {
+export function buildSystemPrompt(
+  request: GenerateRequest,
+  research?: ResearchPacket,
+): string {
+  if (request.mode === "inside-ar") {
+    return buildInsideArSystemPrompt(request, research);
+  }
+
   const mode = getWritingMode(request.mode);
   return `${BASE_PROMPT}\n\nCONTENT LEVEL\n${CONTENT_INSTRUCTIONS[request.contentLevel]}\n\nCURRENT MODE\n${mode.name}: ${mode.instruction}\n\nOUTPUT LIMIT\nThe entire answer must remain at or below ${request.maxCharacters.toLocaleString()} characters.`;
 }
 
+function buildArUserPrompt(request: GenerateRequest): string {
+  const focus = getArConsultationFocus(request.consultationFocus);
+
+  return [
+    `A&R ASSIGNMENT\n${request.prompt.trim()}`,
+    `CONSULTATION FOCUS\n${focus.name}: ${focus.description}`,
+    request.sourceLyrics.trim()
+      ? `MATERIAL TO EVALUATE\n${request.sourceLyrics.trim()}`
+      : "",
+    request.lockedLyrics.trim()
+      ? `CLIENT-SUPPLIED FACTS AND NON-NEGOTIABLES\nTreat this block as client-supplied context. Do not silently change it, but flag any conflict with verified public evidence.\n${request.lockedLyrics.trim()}`
+      : "",
+    `FINAL REQUIREMENTS
+- Start with the A&R verdict.
+- Give direct, prioritized, artist-specific advice for Trey Trizzy, TRACE, or both as requested.
+- Cite current factual claims with the supplied [R#] research IDs.
+- Label assumptions and inferences instead of presenting them as facts.
+- Include concrete owners, timing, dependencies, and success measures in action plans.
+- Never fabricate metrics, release statuses, achievements, biographies, deals, or public activity.
+- Return the finished consultation only. Do not reveal hidden reasoning.
+- Maximum ${request.maxCharacters.toLocaleString()} characters.`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 export function buildUserPrompt(request: GenerateRequest): string {
+  if (request.mode === "inside-ar") {
+    return buildArUserPrompt(request);
+  }
+
   return [
     `TASK\n${request.prompt.trim()}`,
     request.sourceLyrics.trim()
