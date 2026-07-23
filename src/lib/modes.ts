@@ -59,62 +59,76 @@ export const WRITING_MODES: WritingMode[] = [
   {
     id: "inside-ar",
     name: "Inside A&R",
-    description: "Private career, song, release, group, brand, and deal consultation.",
+    description: "Private career, song, release, group, brand, market, and deal consultation.",
     instruction:
-      "Operate as Trey Trizzy and TRACE's private inside A&R executive. Diagnose honestly, verify current facts, cite live research, and give prioritized actions rather than generic encouragement.",
+      "Operate as Trey Trizzy and TRACE's private inside A&R executive. Diagnose honestly, verify current facts, cite live research, protect rights, and prioritize durable leverage over empty activity.",
     kind: "consultation",
   },
 ];
 
 export const AR_CONSULTATION_FOCUSES: ArConsultationFocus[] = [
   {
-    id: "career-audit",
-    name: "Career Audit",
-    description: "Positioning, catalog, audience, leverage, gaps, and next moves.",
+    id: "quick-verdict",
+    name: "Quick A&R Verdict",
+    description: "Rapid decision, strongest reason, biggest concern, next action, and confidence.",
     starter:
-      "Audit my current solo career position. Tell me what is working, what is confusing, what is holding me back, and the highest-leverage moves for the next 30 and 90 days.",
+      "Give me a Quick A&R Verdict. State the decision first, the strongest reason, the biggest concern, the best next action, and your confidence level.",
+  },
+  {
+    id: "career-audit",
+    name: "Career Consultation",
+    description: "Executive diagnosis, strengths, vulnerabilities, leverage, distractions, and sequencing.",
+    starter:
+      "Audit my current solo career position. Identify my strongest assets, vulnerabilities, highest-leverage opportunity, biggest distraction, 30-day move, 90-day move, and one-year implication.",
   },
   {
     id: "song-evaluation",
-    name: "Song Evaluation",
-    description: "A&R score, hook, identity, market fit, revisions, and release readiness.",
+    name: "Song Meeting",
+    description: "100-point A&R score, song job, hook, identity, revisions, test, and release verdict.",
     starter:
-      "Evaluate this song like a demanding label A&R. Score the record, identify the strongest commercial and emotional assets, flag the weak points, and tell me exactly what must change before release.",
+      "Run a full Song Meeting on this record. Classify its job, give the current and potential 100-point scores, identify the strongest and weakest moments, decide whether it belongs to Trey or TRACE, and tell me exactly what must change before release.",
   },
   {
     id: "release-strategy",
-    name: "Release Strategy",
-    description: "Single choice, sequencing, rollout, content, conversion, and measurement.",
+    name: "Release Room",
+    description: "Release objective, positioning, timeline, assets, content, conversion, risks, and measurement.",
     starter:
-      "Build the strongest release strategy for this record using my real current catalog, audience signals, content strengths, budget reality, and the present music market.",
+      "Run a Release Room for this record using my verified current catalog, audience signals, asset readiness, budget reality, competing priorities, and the present music market.",
   },
   {
     id: "trace-development",
-    name: "TRACE Development",
-    description: "Group identity, member roles, songs, visuals, audience, and virtual-member rules.",
+    name: "TRACE Group Meeting",
+    description: "Member balance, vocal allocation, visuals, chemistry, audience, repertoire, disclosure, and rights.",
     starter:
-      "Evaluate TRACE as a Memphis R&B group. Strengthen the group identity, member roles, repertoire, audience position, visual world, disclosure language, and next development priorities.",
+      "Run a TRACE Group Meeting. Evaluate the group objective, member balance, vocal allocation, visual identity, chemistry, audience signal, song and content strategy, virtual-member disclosure, rights readiness, and next three actions.",
   },
   {
     id: "brand-content",
     name: "Brand + Content",
-    description: "Narrative, public presence, social formats, conversion, and visual consistency.",
+    description: "Public journey, brand separation, narrative, content formats, conversion, and visual consistency.",
     starter:
-      "Audit my brand and content like an A&R working with marketing. Identify the clearest story, strongest repeatable formats, public inconsistencies, conversion gaps, and the content I should make next.",
+      "Audit my public presence, brand separation, strongest narrative, contradictions, repeatable content formats, conversion gaps, and the next three assets I should make.",
   },
   {
     id: "deal-business",
-    name: "Deal + Business",
-    description: "Offers, rights, splits, distribution, publishing, risk, and leverage.",
+    name: "Deal Desk",
+    description: "Strategic value, economics, rights, control, risk clauses, negotiation, walk-away points, and counsel review.",
     starter:
-      "Review this opportunity from an artist-first A&R and business perspective. Explain the upside, hidden costs, rights risks, leverage, missing terms, questions to ask, and walk-away points.",
+      "Run this opportunity through the Deal Desk. Explain what is offered, strategic value, financial structure, rights requested, control lost, risk clauses, negotiation priorities, walk-away conditions, and attorney-review items.",
+  },
+  {
+    id: "weekly-intelligence",
+    name: "Weekly Intelligence Report",
+    description: "Current industry, R&B/pop, platform, AI-rights, campaign, opportunity, and threat intelligence.",
+    starter:
+      "Prepare this week's intelligence report for Trey Trizzy and TRACE. Cover material industry developments, R&B and pop movement, platform changes, AI and rights issues, relevant campaigns, opportunities, threats, and the one action that matters most this week.",
   },
   {
     id: "first-run-assignment",
     name: "First-Run Assignment",
-    description: "Full current audit plus prioritized 30-day and 90-day plan.",
+    description: "Full current public audit, catalog and TRACE status, assets, vulnerabilities, and 30/90-day plan.",
     starter:
-      "Enter First-Run A&R Assignment mode. Conduct a current public audit of Trey Trizzy and TRACE, verify all release statuses, identify contradictions, evaluate the current positioning of both brands, and produce a prioritized 30-day and 90-day development plan. Date every external fact and distinguish verified information from assumptions.",
+      "Enter First-Run A&R Assignment mode. Audit Trey Trizzy's current public artist presence, verify the actual release priority, identify stale or conflicting pages, map the catalog, separate solo and TRACE opportunities, establish TRACE's launch status and member profiles, identify the three strongest assets and vulnerabilities, and produce a practical 30-day and 90-day plan. Complete as much as possible from verified information before requesting private analytics or files.",
   },
 ];
 
