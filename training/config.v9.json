@@ -26,5 +26,6 @@
   "quality_gate": 0.8,
   "max_new_tokens": 320,
   "minimum_train_rows": 90,
-  "minimum_eval_rows": 18
+  "minimum_eval_rows": 18,
+  "evaluation_report": "training/reports/v9-routed-production-final.json"
 }

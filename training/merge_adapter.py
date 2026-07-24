@@ -30,21 +30,35 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="training/config.json")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument(
+        "--evaluation-report",
+        help="Override the quality-gate report path configured for this adapter.",
+    )
     args = parser.parse_args()
 
     config = load_json(resolve_path(args.config))
     adapter_dir = resolve_path(config["output_dir"])
     merged_dir = resolve_path(config["merged_dir"])
-    evaluation_path = ROOT / "training" / "reports" / "adapter_eval.json"
+    configured_report = args.evaluation_report or config.get(
+        "evaluation_report", "training/reports/adapter_eval.json"
+    )
+    evaluation_path = resolve_path(str(configured_report))
 
     if not adapter_dir.exists():
         raise FileNotFoundError(f"Adapter directory does not exist: {adapter_dir}")
+    evaluation: dict[str, Any] | None = None
     if not evaluation_path.exists() and not args.force:
-        raise RuntimeError("Adapter evaluation report is missing. Run `npm run train:evaluate` first.")
-    if evaluation_path.exists() and not args.force:
+        raise RuntimeError(
+            f"Adapter evaluation report is missing at {evaluation_path}. "
+            "Run the configured evaluation command first."
+        )
+    if evaluation_path.exists():
         evaluation = load_json(evaluation_path)
-        if not evaluation.get("gatePassed"):
-            raise RuntimeError("The adapter did not pass the quality gate. Refusing to merge without --force.")
+        if not evaluation.get("gatePassed") and not args.force:
+            raise RuntimeError(
+                "The configured adapter evaluation did not pass the quality gate. "
+                "Refusing to merge without --force."
+            )
 
     merged_dir.mkdir(parents=True, exist_ok=True)
     dtype = torch.bfloat16 if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else torch.float16
@@ -73,6 +87,11 @@ def main() -> None:
         "baseModel": config["base_model"],
         "adapterDirectory": str(adapter_dir.relative_to(ROOT)),
         "mergedDirectory": str(merged_dir.relative_to(ROOT)),
+        "evaluationReport": str(evaluation_path.relative_to(ROOT)),
+        "evaluationGatePassed": bool(evaluation and evaluation.get("gatePassed")),
+        "adapterPassRate": (
+            evaluation.get("adapter", {}).get("passRate") if evaluation else None
+        ),
         "qualityGateForced": bool(args.force),
     }
     (merged_dir / "merge_manifest.json").write_text(
