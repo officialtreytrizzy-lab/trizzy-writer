@@ -50,7 +50,13 @@
     "train:preflight-v7": "python3 training/preflight.py --config training/config.v7.json",
     "train:run-v7": "python3 training/train_qlora.py --config training/config.v7.json",
     "train:evaluate-v7": "python3 training/evaluate_adapter.py --config training/config.v7.json --report-name v7-routed-final",
-    "train:merge-v7": "python3 training/merge_adapter.py --config training/config.v7.json"
+    "train:merge-v7": "python3 training/merge_adapter.py --config training/config.v7.json",
+    "train:v8-data": "npx tsx scripts/build-routed-v7-dataset.ts && npx tsx scripts/build-routed-v8-dataset.ts",
+    "train:v8-validate": "npx tsx scripts/build-routed-v7-dataset.ts && npx tsx scripts/build-routed-v8-dataset.ts --check",
+    "train:preflight-v8": "python3 training/preflight.py --config training/config.v8.json",
+    "train:run-v8": "python3 training/train_qlora.py --config training/config.v8.json",
+    "train:evaluate-v8": "python3 training/evaluate_adapter.py --config training/config.v8.json --report-name v8-routed-final",
+    "train:merge-v8": "python3 training/merge_adapter.py --config training/config.v8.json"
   },
   "dependencies": {
     "firebase": "^12.0.0",
