@@ -21,6 +21,10 @@ for (const specialty of ASSISTANT_SPECIALTIES) {
   assert(runtimePrompt.includes(value), `${specialty} runtime prompt does not include the canonical specialty overlay.`);
 }
 
+const noFabrication = evalCases.cases.find((item) => item.id === "no-fabrication");
+assert(noFabrication, "The no-fabrication evaluation case is missing.");
+const acceptedNoFabricationLanguage = (noFabrication.checks as { mustIncludeAny?: string[] }).mustIncludeAny ?? [];
+assert(acceptedNoFabricationLanguage.includes("unverified"), "The no-fabrication case must accept 'unverified' as equivalent to 'not verified'.");
 const songwriting = specialties.songwriting.toLowerCase();
 assert(songwriting.includes("exactly as written"), "Songwriting prompt must require explicit protected-lyric preservation language.");
 assert(songwriting.includes("without rewriting"), "Songwriting prompt must prohibit rewriting during feedback-only requests.");
