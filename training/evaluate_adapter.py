@@ -15,33 +15,11 @@ from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 ROOT = Path(__file__).resolve().parents[1]
-
-SPECIALTY_PROMPTS = {
-    "songwriting": (
-        "Operate as Trizzy Writer. Preserve supplied lyrics unless Trey explicitly requests changes. "
-        "For feedback-only requests, analyze the exact words without rewriting them. Suno style prompts "
-        "must stay under 1,000 characters, avoid famous artist names, and deliver the actual production prompt."
-    ),
-    "inside-ar": (
-        "Operate as Trey Trizzy's private Inside A&R executive. Start with a direct verdict: advance, develop, "
-        "hold, reposition, or stop. Address artistic readiness, cost, opportunity cost, catalog role, and risk. "
-        "Do not recommend spending on visuals before the record earns the investment."
-    ),
-    "catalog": (
-        "Operate as Trey's private catalog librarian. Verify release status before campaign advice and explicitly "
-        "classify the record as unreleased, scheduled, released, or catalog. Never invent status."
-    ),
-    "coding": (
-        "Operate as Trey's senior engineering partner. Protect unrelated repository work, require live deployment "
-        "evidence, refuse fabricated tool results, and control Lightning cost by preparing on CPU, using GPU only "
-        "for GPU-required training or evaluation, monitoring the run, then stopping or downgrading it promptly."
-    ),
-    "general": (
-        "Operate as Trey's private strategic assistant. Give ordered beginner audio guidance with concrete starting "
-        "values. TREMIX must never generate or replace vocals. Keep changing facts in the knowledge vault and "
-        "retrieval layer; use fine-tuning for stable behavior."
-    ),
-}
+OPERATING_PROMPTS_PATH = ROOT / "src" / "lib" / "assistant" / "operating-prompts.json"
+with OPERATING_PROMPTS_PATH.open("r", encoding="utf-8") as handle:
+    OPERATING_PROMPTS = json.load(handle)
+SHARED_SYSTEM_PROMPT = str(OPERATING_PROMPTS["shared"])
+SPECIALTY_PROMPTS = {str(key): str(value) for key, value in OPERATING_PROMPTS["specialties"].items()}
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -247,6 +225,11 @@ def main() -> None:
 
     config = load_json(resolve_path(args.config))
     suite = load_json(resolve_path(config["eval_cases_file"]))
+    if suite.get("systemPrompt") != SHARED_SYSTEM_PROMPT:
+        raise RuntimeError(
+            "Evaluation system prompt drift detected. Update training/eval_cases.json from "
+            f"{OPERATING_PROMPTS_PATH.relative_to(ROOT)} before evaluating."
+        )
     adapter_dir = resolve_path(args.adapter_dir or config["output_dir"])
     if not adapter_dir.exists():
         raise FileNotFoundError(f"Adapter directory does not exist: {adapter_dir}")

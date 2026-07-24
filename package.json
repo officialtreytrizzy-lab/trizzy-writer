@@ -62,7 +62,8 @@
     "train:preflight-v9": "python3 training/preflight.py --config training/config.v9.json",
     "train:run-v9": "python3 training/train_qlora.py --config training/config.v9.json",
     "train:evaluate-v9": "python3 training/evaluate_adapter.py --config training/config.v9.json --report-name v9-routed-final",
-    "train:merge-v9": "python3 training/merge_adapter.py --config training/config.v9.json"
+    "train:merge-v9": "python3 training/merge_adapter.py --config training/config.v9.json",
+    "check:prompts": "npx tsx scripts/check-prompt-alignment.ts"
   },
   "dependencies": {
     "firebase": "^12.0.0",

@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import operatingPrompts from "../src/lib/assistant/operating-prompts.json";
 
 type Specialty = "songwriting" | "inside-ar" | "catalog" | "coding" | "general";
 type Row = {
@@ -20,18 +21,7 @@ const V8_TRAIN = path.join(OUTPUT, "routed-v8-train.jsonl");
 const V8_EVAL = path.join(OUTPUT, "routed-v8-eval.jsonl");
 const CHECK_ONLY = process.argv.includes("--check");
 
-const SPECIALTY_PROMPTS: Record<Specialty, string> = {
-  songwriting:
-    "Operate as Trizzy Writer. Preserve supplied lyrics unless Trey explicitly requests changes. When the request is feedback only or the lyrics are locked, explicitly say you will keep the lyrics exactly as written or give feedback without rewriting them. Analyze the supplied words, cadence, delivery, melody, and structure without drifting into unrelated A&R advice.",
-  "inside-ar":
-    "Operate as Trey Trizzy's private Inside A&R executive. Start with a direct verdict: advance, develop, hold, reposition, or stop. Address artistic readiness, cost, opportunity cost, catalog role, and risk.",
-  catalog:
-    "Operate as Trey's private catalog librarian. When release status is uncertain, explicitly state that it is unverified, use the word verify, and verify whether the record is released before campaign advice. Never assert that an uncertain record is unreleased or not yet released. Classify it only after evidence as unreleased, scheduled, released, or catalog.",
-  coding:
-    "Operate as Trey's senior engineering partner. Protect unrelated repository work, require live deployment evidence, refuse fabricated tool results, and control Lightning cost.",
-  general:
-    "Operate as Trey's private strategic assistant. Give ordered beginner audio guidance with concrete starting values. TREMIX must never generate or replace vocals. Keep changing facts in retrieval and use fine-tuning for stable behavior.",
-};
+const SPECIALTY_PROMPTS = operatingPrompts.specialties satisfies Record<Specialty, string>;
 
 const REPLAY_GROUPS = new Set([
   "v7-dirty-repo-status",
@@ -142,7 +132,7 @@ async function main() {
   for (const group of CORRECTIVE_GROUPS) {
     assert(group.prompts.length === 6, `${group.id} must have six prompt variants.`);
     assert(group.answer.length >= 180, `${group.id} answer is too short.`);
-    const routedSystem = `${evalCases.systemPrompt}\n\nACTIVE SPECIALTY: ${group.specialty}\n${SPECIALTY_PROMPTS[group.specialty]}`;
+    const routedSystem = `${operatingPrompts.shared}\n\nACTIVE SPECIALTY: ${group.specialty}\n${SPECIALTY_PROMPTS[group.specialty]}`;
     group.prompts.forEach((userPrompt, index) => {
       const normalized = userPrompt.trim().toLowerCase().replace(/\s+/g, " ");
       assert(!prompts.has(normalized), `Duplicate prompt: ${userPrompt}`);

@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import operatingPrompts from "../src/lib/assistant/operating-prompts.json";
 
 type Specialty = "songwriting" | "inside-ar" | "catalog" | "coding" | "general";
 type Message = { role: "system" | "user" | "assistant"; content: string };
@@ -21,18 +22,7 @@ const V7_TRAIN = path.join(OUTPUT, "routed-v7-train.jsonl");
 const V7_EVAL = path.join(OUTPUT, "routed-v7-eval.jsonl");
 const CHECK_ONLY = process.argv.includes("--check");
 
-const SPECIALTY_PROMPTS: Record<Specialty, string> = {
-  songwriting:
-    "Operate as Trizzy Writer. Preserve supplied lyrics unless Trey explicitly requests changes. For feedback-only requests, analyze the exact words without rewriting them. Suno style prompts must stay under 1,000 characters, avoid famous artist names, and deliver the actual production prompt.",
-  "inside-ar":
-    "Operate as Trey Trizzy's private Inside A&R executive. Start with a direct verdict: advance, develop, hold, reposition, or stop. Address artistic readiness, cost, opportunity cost, catalog role, and risk. Do not recommend spending on visuals before the record earns the investment.",
-  catalog:
-    "Operate as Trey's private catalog librarian. Verify release status before campaign advice and explicitly classify the record as unreleased, scheduled, released, or catalog. Never invent status.",
-  coding:
-    "Operate as Trey's senior engineering partner. Protect unrelated repository work, require live deployment evidence, refuse fabricated tool results, and control Lightning cost by preparing on CPU, using GPU only for GPU-required training or evaluation, monitoring the run, then stopping or downgrading it promptly.",
-  general:
-    "Operate as Trey's private strategic assistant. Give ordered beginner audio guidance with concrete starting values. TREMIX must never generate or replace vocals. Keep changing facts in the knowledge vault and retrieval layer; use fine-tuning for stable behavior.",
-};
+const SPECIALTY_PROMPTS = operatingPrompts.specialties satisfies Record<Specialty, string>;
 
 const REPLAY_GROUPS = new Set([
   "v7-dirty-repo-status",
@@ -199,7 +189,7 @@ async function main() {
   for (const group of CORRECTIVE_GROUPS) {
     assert(group.prompts.length === 6, `${group.id} must have six prompt variants.`);
     assert(group.answer.length >= 180, `${group.id} answer is too short.`);
-    const routedSystem = `${evalCases.systemPrompt}\n\nACTIVE SPECIALTY: ${group.specialty}\n${SPECIALTY_PROMPTS[group.specialty]}`;
+    const routedSystem = `${operatingPrompts.shared}\n\nACTIVE SPECIALTY: ${group.specialty}\n${SPECIALTY_PROMPTS[group.specialty]}`;
     group.prompts.forEach((userPrompt, index) => {
       const normalized = userPrompt.trim().toLowerCase().replace(/\s+/g, " ");
       assert(!prompts.has(normalized), `Duplicate prompt: ${userPrompt}`);
