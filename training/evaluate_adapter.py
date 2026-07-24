@@ -16,6 +16,33 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 ROOT = Path(__file__).resolve().parents[1]
 
+SPECIALTY_PROMPTS = {
+    "songwriting": (
+        "Operate as Trizzy Writer. Preserve supplied lyrics unless Trey explicitly requests changes. "
+        "For feedback-only requests, analyze the exact words without rewriting them. Suno style prompts "
+        "must stay under 1,000 characters, avoid famous artist names, and deliver the actual production prompt."
+    ),
+    "inside-ar": (
+        "Operate as Trey Trizzy's private Inside A&R executive. Start with a direct verdict: advance, develop, "
+        "hold, reposition, or stop. Address artistic readiness, cost, opportunity cost, catalog role, and risk. "
+        "Do not recommend spending on visuals before the record earns the investment."
+    ),
+    "catalog": (
+        "Operate as Trey's private catalog librarian. Verify release status before campaign advice and explicitly "
+        "classify the record as unreleased, scheduled, released, or catalog. Never invent status."
+    ),
+    "coding": (
+        "Operate as Trey's senior engineering partner. Protect unrelated repository work, require live deployment "
+        "evidence, refuse fabricated tool results, and control Lightning cost by preparing on CPU, using GPU only "
+        "for GPU-required training or evaluation, monitoring the run, then stopping or downgrading it promptly."
+    ),
+    "general": (
+        "Operate as Trey's private strategic assistant. Give ordered beginner audio guidance with concrete starting "
+        "values. TREMIX must never generate or replace vocals. Keep changing facts in the knowledge vault and "
+        "retrieval layer; use fine-tuning for stable behavior."
+    ),
+}
+
 
 def load_json(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
@@ -81,9 +108,18 @@ def strip_thinking(text: str) -> str:
     return cleaned
 
 
-def render_prompt(tokenizer: AutoTokenizer, system_prompt: str, user_prompt: str) -> str:
+def render_prompt(
+    tokenizer: AutoTokenizer,
+    system_prompt: str,
+    user_prompt: str,
+    specialty: str | None = None,
+) -> str:
+    specialty_prompt = SPECIALTY_PROMPTS.get(specialty or "", "")
+    routed_system_prompt = system_prompt
+    if specialty_prompt:
+        routed_system_prompt += f"\n\nACTIVE SPECIALTY: {specialty}\n{specialty_prompt}"
     messages = [
-        {"role": "system", "content": system_prompt},
+        {"role": "system", "content": routed_system_prompt},
         {"role": "user", "content": user_prompt},
     ]
     try:
@@ -131,7 +167,7 @@ def generate_suite(
     results: list[dict[str, Any]] = []
 
     for case in suite["cases"]:
-        prompt_text = render_prompt(tokenizer, suite["systemPrompt"], case["prompt"])
+        prompt_text = render_prompt(tokenizer, suite["systemPrompt"], case["prompt"], case.get("specialty"))
         inputs = tokenizer(prompt_text, return_tensors="pt").to("cuda")
         with torch.inference_mode():
             output = model.generate(
@@ -149,6 +185,7 @@ def generate_suite(
         results.append(
             {
                 "id": case["id"],
+                "specialty": case.get("specialty"),
                 "prompt": case["prompt"],
                 "response": response,
                 "rawResponse": raw_response,
@@ -199,6 +236,8 @@ def markdown_report(report: dict[str, Any]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="training/config.json")
+    parser.add_argument("--adapter-dir", help="Override the adapter directory from the config.")
+    parser.add_argument("--report-name", default="adapter_eval", help="Report filename stem inside training/reports.")
     parser.add_argument("--skip-base", action="store_true", help="Evaluate only the adapter.")
     parser.add_argument("--allow-fail", action="store_true", help="Write reports without a failing exit code.")
     args = parser.parse_args()
@@ -208,7 +247,7 @@ def main() -> None:
 
     config = load_json(resolve_path(args.config))
     suite = load_json(resolve_path(config["eval_cases_file"]))
-    adapter_dir = resolve_path(config["output_dir"])
+    adapter_dir = resolve_path(args.adapter_dir or config["output_dir"])
     if not adapter_dir.exists():
         raise FileNotFoundError(f"Adapter directory does not exist: {adapter_dir}")
 
@@ -252,13 +291,16 @@ def main() -> None:
 
     report_dir = ROOT / "training" / "reports"
     report_dir.mkdir(parents=True, exist_ok=True)
-    (report_dir / "adapter_eval.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    (report_dir / "adapter_eval.md").write_text(markdown_report(report) + "\n", encoding="utf-8")
+    report_stem = args.report_name.strip() or "adapter_eval"
+    json_report = report_dir / f"{report_stem}.json"
+    markdown_report_path = report_dir / f"{report_stem}.md"
+    json_report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    markdown_report_path.write_text(markdown_report(report) + "\n", encoding="utf-8")
     print(json.dumps({
         "gatePassed": gate_passed,
         "basePassRate": base_report["passRate"],
         "adapterPassRate": adapter_report["passRate"],
-        "report": str(report_dir / "adapter_eval.json"),
+        "report": str(json_report),
     }, indent=2))
 
     if not gate_passed and not args.allow_fail:
